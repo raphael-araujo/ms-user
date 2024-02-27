@@ -1,5 +1,8 @@
 package com.raphael.msuser.web.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.raphael.msuser.exception.NotificationProcessingException;
+import com.raphael.msuser.infra.mqueue.MsNotificationPublisher;
 import com.raphael.msuser.jwt.JwtToken;
 import com.raphael.msuser.jwt.JwtUserDetailsService;
 import com.raphael.msuser.web.dto.UserLoginDto;
@@ -33,6 +36,7 @@ public class AuthenticationController {
 
     private final JwtUserDetailsService detailsService;
     private final AuthenticationManager authenticationManager;
+    private final MsNotificationPublisher notificationPublisher;
 
     @Operation(summary = "Autenticar na API", description = "Recurso de autenticação na API",
             responses = {
@@ -55,9 +59,12 @@ public class AuthenticationController {
 
             JwtToken token = detailsService.getTokenAuthenticated(loginDto.getEmail());
 
+            notificationPublisher.sendNotification(loginDto.getEmail(), "LOGIN");
             return ResponseEntity.ok(token);
         } catch (AuthenticationException ex) {
             log.warn("Bad Credentials from username '{}'", loginDto.getEmail());
+        } catch (JsonProcessingException e) {
+            throw new NotificationProcessingException(e.getMessage());
         }
         return ResponseEntity
                 .badRequest()

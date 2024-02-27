@@ -1,9 +1,12 @@
 package com.raphael.msuser.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.raphael.msuser.entity.UserEntity;
 import com.raphael.msuser.exception.EntityNotFoundException;
+import com.raphael.msuser.exception.NotificationProcessingException;
 import com.raphael.msuser.exception.PasswordInvalidException;
 import com.raphael.msuser.exception.UniqueCredentialsViolationException;
+import com.raphael.msuser.infra.mqueue.MsNotificationPublisher;
 import com.raphael.msuser.repository.UserRepository;
 import com.raphael.msuser.web.dto.UserUpdateDto;
 import lombok.RequiredArgsConstructor;
@@ -18,14 +21,18 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MsNotificationPublisher notificationPublisher;
 
     @Transactional
     public void save(UserEntity user) {
         try {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             userRepository.save(user);
+            notificationPublisher.sendNotification(user.getEmail(), "CREATE");
         } catch (DataIntegrityViolationException ex) {
             throw new UniqueCredentialsViolationException("E-mail ou CPF já cadastrado no sistema.");
+        } catch (JsonProcessingException e) {
+            throw new NotificationProcessingException(e.getMessage());
         }
     }
 
@@ -37,24 +44,33 @@ public class UserService {
     }
 
     @Transactional
-    public void editPassword(Long id, String password) {
-        UserEntity user = findById(id);
-        if (passwordEncoder.matches(password, user.getPassword())) {
-            throw new PasswordInvalidException("A nova senha tem que ser diferente da senha atual.");
+    public UserEntity editUser(Long id, UserUpdateDto updateDto) {
+        try {
+            UserEntity user = findById(id);
+
+            user.setFirstName(updateDto.getFirstName());
+            user.setLastName(updateDto.getLastName());
+            user.setBirthdate(updateDto.getBirthdate());
+            user.setCep(updateDto.getCep());
+            user.setActive(updateDto.getActive());
+
+            notificationPublisher.sendNotification(user.getEmail(), "UPDATE");
+            return userRepository.save(user);
+        } catch (JsonProcessingException e) {
+            throw new NotificationProcessingException(e.getMessage());
         }
-        user.setPassword(passwordEncoder.encode(password));
     }
 
     @Transactional
-    public UserEntity editUser(Long id, UserUpdateDto updateDto) {
-        UserEntity user = findById(id);
-
-        user.setFirstName(updateDto.getFirstName());
-        user.setLastName(updateDto.getLastName());
-        user.setBirthdate(updateDto.getBirthdate());
-        user.setCep(updateDto.getCep());
-        user.setActive(updateDto.getActive());
-
-        return userRepository.save(user);
+    public void editPassword(Long id, String password) {
+        try {
+            UserEntity user = findById(id);
+            if (passwordEncoder.matches(password, user.getPassword()))
+                throw new PasswordInvalidException("A nova senha tem que ser diferente da senha atual.");
+            user.setPassword(passwordEncoder.encode(password));
+            notificationPublisher.sendNotification(user.getEmail(), "UPDATE_PASSWORD");
+        } catch (JsonProcessingException e) {
+            throw new NotificationProcessingException(e.getMessage());
+        }
     }
 }
