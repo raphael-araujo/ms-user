@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Users", description = "Contém as operações relativas aos recursos para cadastro, edição e leitura de um usuário.")
@@ -76,6 +77,7 @@ public class UserController {
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
             })
     @PutMapping("/{id}")
+    @PreAuthorize("(#id == authentication.principal.id)")
     public ResponseEntity<UserResponseDto> editUserInfo(@PathVariable Long id, @Valid @RequestBody UserUpdateDto updateDto) {
         UserEntity user = userService.editUser(id, updateDto);
         return ResponseEntity.ok(modelMapper.map(user, UserResponseDto.class));
@@ -93,6 +95,7 @@ public class UserController {
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
             })
     @PutMapping("/{id}/password")
+    @PreAuthorize("(#id == authentication.principal.id)")
     public ResponseEntity<Void> updatePassword(@PathVariable Long id, @Valid @RequestBody UpdatePasswordDto updatePasswordDto) {
         userService.editPassword(id, updatePasswordDto.getPassword());
         return ResponseEntity.noContent().build();
