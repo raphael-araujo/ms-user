@@ -29,6 +29,7 @@ public class UserUpdateDto {
     private LocalDate birthdate;
 
     @NotBlank
+    @Size(min = 9, max = 9, message = "Insira um formato de CEP válido: (xxxxx-xxx)")
     private String cep;
 
     @NotNull

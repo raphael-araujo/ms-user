@@ -1,4 +1,11 @@
 spring:
+  application:
+    name: msuser
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
   web:
     locale-resolver: fixed
     locale: pt_BR
@@ -17,9 +24,17 @@ spring:
         format_sql: false
     hibernate:
       ddl-auto: update
+
+mq:
+  queues:
+    ms-notification: ms-notification
+
 springdoc:
   swagger-ui:
     path: /index.html
   api-docs:
     path: /ms-user
   packages-to-scan: com.raphael.msuser.web.controller
+
+msaddress:
+  url: localhost:8083

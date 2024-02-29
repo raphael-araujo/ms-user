@@ -40,6 +40,7 @@ public class UserCreateDto {
     private String email;
 
     @NotBlank
+    @Size(min = 9, max = 9, message = "Insira um formato de CEP válido: (xxxxx-xxx)")
     private String cep;
 
     @NotBlank(message = "O campo não pode estar em branco.")

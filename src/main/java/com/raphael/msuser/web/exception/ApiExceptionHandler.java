@@ -1,5 +1,6 @@
 package com.raphael.msuser.web.exception;
 
+import com.raphael.msuser.exception.CepNotFoundException;
 import com.raphael.msuser.exception.EntityNotFoundException;
 import com.raphael.msuser.exception.PasswordInvalidException;
 import com.raphael.msuser.exception.UniqueCredentialsViolationException;
@@ -84,5 +85,14 @@ public class ApiExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new ErrorMessage(request, HttpStatus.BAD_REQUEST, "Insira um formato de data válido: (yyyy-MM-dd)"));
+    }
+
+    @ExceptionHandler(CepNotFoundException.class)
+    public ResponseEntity<ErrorMessage> cepNotFoundException(CepNotFoundException ex, HttpServletRequest request) {
+        log.error("Api Error - ", ex);
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new ErrorMessage(request, HttpStatus.NOT_FOUND, ex.getMessage()));
     }
 }
