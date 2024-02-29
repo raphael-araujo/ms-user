@@ -2,12 +2,10 @@ package com.raphael.msuser.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.raphael.msuser.entity.UserEntity;
-import com.raphael.msuser.exception.EntityNotFoundException;
-import com.raphael.msuser.exception.NotificationProcessingException;
-import com.raphael.msuser.exception.PasswordInvalidException;
-import com.raphael.msuser.exception.UniqueCredentialsViolationException;
+import com.raphael.msuser.exception.*;
 import com.raphael.msuser.infra.mqueue.MsNotificationPublisher;
 import com.raphael.msuser.repository.UserRepository;
+import com.raphael.msuser.web.client.AddressClient;
 import com.raphael.msuser.web.dto.UserUpdateDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -22,12 +20,18 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final MsNotificationPublisher notificationPublisher;
+    private final AddressClient addressClient;
 
     @Transactional
     public void save(UserEntity user) {
         try {
+            var address = addressClient.findByCep(user.getCep());
+            if (address.getUf() == null)
+                throw new CepNotFoundException("O CEP informado não existe.");
+
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             userRepository.save(user);
+            addressClient.saveAddressWithUser(user.getCep(), user.getEmail());
             notificationPublisher.sendNotification(user.getEmail(), "CREATE");
         } catch (DataIntegrityViolationException ex) {
             throw new UniqueCredentialsViolationException("E-mail ou CPF já cadastrado no sistema.");
@@ -46,6 +50,10 @@ public class UserService {
     @Transactional
     public UserEntity editUser(Long id, UserUpdateDto updateDto) {
         try {
+            var address = addressClient.findByCep(updateDto.getCep());
+            if (address.getUf() == null)
+                throw new CepNotFoundException("O CEP informado não existe.");
+
             UserEntity user = findById(id);
 
             user.setFirstName(updateDto.getFirstName());
@@ -54,6 +62,7 @@ public class UserService {
             user.setCep(updateDto.getCep());
             user.setActive(updateDto.getActive());
 
+            addressClient.saveAddressWithUser(user.getCep(), user.getEmail());
             notificationPublisher.sendNotification(user.getEmail(), "UPDATE");
             return userRepository.save(user);
         } catch (JsonProcessingException e) {
