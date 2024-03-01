@@ -13,7 +13,6 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class UserUpdateDto {
 
     @NotBlank(message = "O campo não pode estar em branco.")

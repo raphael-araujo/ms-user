@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: msuser
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  web:
+    locale-resolver: fixed
+    locale: pt_BR
+  mvc:
+    format:
+      date-time: iso
+  jpa:
+    properties:
+      hibernate:
+        format_sql=false
+    show-sql: true
+
+mq:
+  queues:
+    ms-notification: ms-notification
+
+msaddress:
+  url: localhost:8083

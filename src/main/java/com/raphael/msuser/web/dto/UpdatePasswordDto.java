@@ -8,7 +8,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class UpdatePasswordDto {
 
     @NotBlank(message = "O campo não pode estar em branco.")
