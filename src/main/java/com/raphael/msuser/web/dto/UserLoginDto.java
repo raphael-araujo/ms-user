@@ -9,7 +9,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class UserLoginDto {
     @NotBlank(message = "O campo não pode estar em branco.")
     @Email(message = "Insira um e-mail válido.")

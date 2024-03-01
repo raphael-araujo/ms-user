@@ -14,7 +14,6 @@ import java.util.Map;
 
 @Getter
 @NoArgsConstructor
-@ToString
 public class ErrorMessage {
 
     private String path;

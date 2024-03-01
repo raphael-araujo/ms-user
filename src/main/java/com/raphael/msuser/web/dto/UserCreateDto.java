@@ -15,7 +15,6 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class UserCreateDto {
 
     @NotBlank(message = "O campo não pode estar em branco.")
