@@ -28,17 +28,19 @@ O projeto consiste em um microsserviço desenvolvido em Spring Boot para gerenci
 ### Setup
 
 <br>
+
 1 - Clone o repositório
 
-```
+````
 git clone https://github.com/raphael-araujo/ms-user.git
-```
+````
 
 <br>
 
 2 - Crie e Configure o banco de dados de acordo com o arquivo `application.yml`
 
 <br>
+
 3 - Suba o container RabbitMQ no docker
 
 ````
@@ -47,9 +49,9 @@ docker run -it --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.12-managem
 
 4 - Execute a aplicação
 
-```
+````
 mvn spring-boot:run
-```
+````
 
 A aplicação deverá estar em execução e acessível em http://localhost:8080/
 <br>
@@ -64,7 +66,7 @@ A aplicação deverá estar em execução e acessível em http://localhost:8080/
 
 ### Documentação
 
-- Collections do Postman da raiz do projeto
+- Collections do Postman na raiz do projeto
 
 - Swagger: http://localhost:8080/swagger-ui/index.html
 
